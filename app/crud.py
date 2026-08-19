@@ -17,4 +17,6 @@ def create_short_url(db:Session,long_url:str):
     db.commit()
     db.refresh(url)
     return url
-          
+
+def get_url_by_short_code(db:Session,short_code:str):
+    return db.query(URL).filter(URL.short_code==short_code).first()
