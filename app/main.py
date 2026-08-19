@@ -1,26 +1,28 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import RedirectResponse
-from .database import Base,engine,get_db
+from .database import Base,engine,get_db, settings
 from . import models,schemas,crud
 from sqlalchemy.orm import Session
 
 Base.metadata.create_all(bind=engine)
 
 
-app=FastAPI(title="URL-Shortener API")
+app=FastAPI(title="URL Shortener API",
+            description="A simple URL shortening service built with FastAPI and PostgreSQL.",
+             version="1.0.0")
 @app.get("/")
 def root():
-    return {"message": "URL-shorterner api is running!"}
+    return {"message": "URL shorterner api is running!"}
 
-@app.post("/shorten",response_model=schemas.URLResponse,status_code=201)
+@app.post("/shorten",response_model=schemas.URLResponse,status_code=201,summary="Create a shortened URL")
 def shorten_url(data:schemas.URLCreate,db:Session=Depends(get_db)):
     url=crud.create_short_url(db,str(data.url))
     return{
         "short_code":url.short_code,
-        "short_url":f"http://localhost:8000/{url.short_code}"
+        "short_url":f"{settings.BASE_URL}/{url.short_code}"
     }
 
-@app.get("/{short_code}")
+@app.get("/{short_code}",summary="Redirect to the original URL")
 def redirect_url(short_code:str, db:Session=Depends(get_db)):
     url=crud.get_url_by_short_code(db,short_code)
     if not url:

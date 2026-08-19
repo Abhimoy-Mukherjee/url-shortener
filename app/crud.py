@@ -1,11 +1,11 @@
-import random
+import secrets
 import string
 from sqlalchemy.orm import Session
 from .models import URL
 
 def generate_short_code(length=6):
     characters=string.ascii_letters+string.digits
-    return "".join(random.choices(characters,k=length))
+    return "".join(secrets.choice(characters) for _ in range(length))
 
 def create_short_url(db:Session,long_url:str):
     short_code=generate_short_code()
